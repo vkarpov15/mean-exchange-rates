@@ -1,0 +1,39 @@
+doctype 5
+html(ng-app="MyStore")
+  head
+    title Welcome to my Store!
+    
+    link(rel='stylesheet', href='/stylesheets/style.css')
+
+    script(src='//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js')
+
+    script(type='text/javascript')
+      angular.module("MyStore", []).
+      filter('displayPrice', function() {
+        return function(ordinal, fromCurrency, toCurrency, rates) {
+          return (ordinal / rates[fromCurrency] * rates[toCurrency]).toFixed(2)
+              + " " + toCurrency;
+        };
+      });
+
+    script(type='text/javascript')
+      function StoreController($scope) {
+        $scope.setProductsAndRates = function(products, rates) {
+          $scope.products = products;
+          $scope.rates = rates;
+          $scope.displayCurrency = 'EUR';
+        };
+      }
+
+  body
+    h1 Welcome to My Store!
+    div(ng-controller="StoreController",
+        ng-init="setProductsAndRates( #{JSON.stringify(products)}, #{JSON.stringify(rates)} )")
+      h2
+        | Select Your Currency&nbsp;
+        select( ng-model="displayCurrency",
+                ng-options="currency as currency for (currency, rate) in rates")
+      div(ng-repeat="product in products" style="border: 1px solid #333; padding: 15px")
+        img(ng-src="{{product.picture}}", style="height: 50px; width: 50px")
+        h3 {{product.name}}
+        h4 {{product.price.price | displayPrice:product.price.currency:displayCurrency:rates}}
